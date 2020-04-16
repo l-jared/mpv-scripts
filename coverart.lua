@@ -22,6 +22,12 @@ local o = {
     --if this option is set to true then it will search for coverart on every file
     always_scan_coverart = false,
 
+    --remove covers from playlist
+    clean_playlist = false,
+
+    --add extra video tracks
+    add_extra = false,
+
     --file path of a placeholder image to use if no cover art is found
     --will only be used if force-window is enabled
     --leaving it blank will be the same as disabling it
@@ -45,7 +51,7 @@ function is_audio_file()
     if mp.get_property_number('vid', 0) == 0 then
         return true
     else
-        if mp.get_property_number('container-fps', 0) < 2 and mp.get_property_number('aid', 0) ~= 0 then
+        if mp.get_property_number('container-fps', 0) < 2 and (o.clean_playlist and true or mp.get_property_number('aid', 0) ~= 0) then
             return true
         end
     end
@@ -81,7 +87,7 @@ function checkForCoverart()
     local filepath = mp.get_property('path')
     msg.verbose('filepath: ' .. filepath)
 
-    --does not look for cover art if the file is not ana audio file
+    --does not look for cover art if the file is not an audio file
     if not o.always_scan_coverart and not is_audio_file() then
         msg.verbose('file is not an audio file, aborting coverart search')
         loadPlaceholder()
@@ -133,12 +139,21 @@ function checkForCoverart()
         if o.names == "" or names[filename] then
             msg.verbose(file .. ' found in whitelist - adding as extra video track...')
             local coverart = utils.join_path(directory, files[i])
+            if o.clean_playlist then
+                local count = mp.get_property_number("playlist/count", 1)
+                local playlist = mp.get_property_native("playlist", {})
+                for i, item in ipairs(playlist) do
+                    if item.filename == file and (not item.current or count ~= i) then
+                        mp.commandv('playlist-remove', i-1)
+                    end
+                end
+            end
 
             --adds the new file to the playing list
             --if there is no video track currently selected then it autoloads track #1
             if mp.get_property_number('vid', 0) == 0 then
                 mp.commandv('video-add', coverart)
-            else
+            elseif o.add_extra then
                 mp.commandv('video-add', coverart, "auto")
             end
         end
