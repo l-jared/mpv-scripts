@@ -143,7 +143,7 @@ function checkForCoverart()
                 local count = mp.get_property_number("playlist/count", 1)
                 local playlist = mp.get_property_native("playlist", {})
                 for i, item in ipairs(playlist) do
-                    if item.filename == file and (not item.current or count ~= i) then
+                    if string.match(item.filename, "([^/]*)$") == file and (not item.current or count ~= i) then
                         mp.commandv('playlist-remove', i-1)
                     end
                 end
