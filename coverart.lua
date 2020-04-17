@@ -10,7 +10,7 @@ local o = {
     --the script is not case specific
     --any file with valid names and valid image extensions are loaded
     --if set to blank then image files with any name will be loaded
-    names = "cover;folder;album;front",
+    names = 'cover;folder;album;front',
 
     --valid image extensions, same syntax as the names option
     --leaving it blank will load files of any type (with the matching filename)
@@ -31,7 +31,7 @@ local o = {
     --file path of a placeholder image to use if no cover art is found
     --will only be used if force-window is enabled
     --leaving it blank will be the same as disabling it
-    placeholder = "",
+    placeholder = '',
 }
 
 local names = {}
@@ -40,7 +40,7 @@ local imageExts = {}
 --splits the string into a table on the semicolons
 function create_table(input)
     local t={}
-    for str in string.gmatch(input, "([^;]+)") do
+    for str in string.gmatch(input, '([^;]+)') do
             t[str] = true
     end
     return t
@@ -71,12 +71,12 @@ end
 
 --loads a placeholder image as cover art for the file
 function loadPlaceholder()
-    if o.placeholder == "" then return end
+    if o.placeholder == '' then return end
 
-    if not (mp.get_property('vid') == "no" and mp.get_property_bool('force-window')) then return end
+    if not (mp.get_property('vid') == 'no' and mp.get_property_bool('force-window')) then return end
 
     msg.verbose('file does not have video track, loading placeholder')
-    local placeholder = mp.command_native({"expand-path", o.placeholder})
+    local placeholder = mp.command_native({'expand-path', o.placeholder})
     mp.commandv('video-add', placeholder)
 end
 
@@ -107,7 +107,7 @@ function checkForCoverart()
     msg.verbose('directory: ' .. directory)
 
     --loads the files from the directory
-    files = utils.readdir(directory, "files")
+    files = utils.readdir(directory, 'files')
     if files == nil then
         msg.verbose('no files could be loaded from directory')
         files = {}
@@ -125,7 +125,7 @@ function checkForCoverart()
         local fileext = file:sub(index + 1)
 
         --if file extension is not an image then moves to the next file
-        if o.imageExts ~= "" and not imageExts[fileext] then
+        if o.imageExts ~= '' and not imageExts[fileext] then
             msg.debug('"' .. fileext .. '" not in whitelist')
             goto continue
         else
@@ -136,14 +136,14 @@ function checkForCoverart()
         local filename = file:sub(0, index - 1)
 
         --if the name matches one in the whitelist then load it
-        if o.names == "" or names[filename] then
+        if o.names == '' or names[filename] then
             msg.verbose(file .. ' found in whitelist - adding as extra video track...')
             local coverart = utils.join_path(directory, files[i])
             if o.clean_playlist then
-                local count = mp.get_property_number("playlist/count", 1)
-                local playlist = mp.get_property_native("playlist", {})
+                local count = mp.get_property_number('playlist/count', 1)
+                local playlist = mp.get_property_native('playlist', {})
                 for i, item in ipairs(playlist) do
-                    if string.match(item.filename, "([^/]*)$") == file and (not item.current or count ~= i) then
+                    if string.match(item.filename, '([^/]*)$') == file and (not item.current or count ~= i) then
                         mp.commandv('playlist-remove', i-1)
                     end
                 end
@@ -154,7 +154,7 @@ function checkForCoverart()
             if mp.get_property_number('vid', 0) == 0 then
                 mp.commandv('video-add', coverart)
             elseif o.add_extra then
-                mp.commandv('video-add', coverart, "auto")
+                mp.commandv('video-add', coverart, 'auto')
             end
         end
 
