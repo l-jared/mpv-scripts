@@ -30,6 +30,9 @@ local o = {
     --stops looking for coverart after finding a single valid file
     load_single_file = false,
 
+    --add extra video tracks
+    add_extra = false,
+
     --file path of a placeholder image to use if no cover art is found
     --will only be used if force-window is enabled
     --leaving it blank will be the same as disabling it
@@ -146,7 +149,7 @@ function loadCover(path)
     --if there is no video track currently selected then it autoloads track #1
     if mp.get_property_number('vid', 0) == 0 then
         mp.commandv('video-add', path)
-    else
+    elseif o.add_extra then
         mp.commandv('video-add', path, "auto")
     end
 end
