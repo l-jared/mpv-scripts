@@ -28,7 +28,7 @@ local o = {
     always_scan_coverart = false,
 
     --stops looking for coverart after finding a single valid file
-    load_single_file = false,
+    load_single_file = true,
 
     --add extra video tracks
     add_extra = false,
@@ -66,6 +66,7 @@ local opt = require 'mp.options'
 
 local names = {}
 local imageExts = {}
+local placeholder
 
 --splits the string into a table on the semicolons
 function create_table(input)
@@ -106,7 +107,6 @@ function loadPlaceholder()
     if not (mp.get_property('vid') == "no" and mp.get_property_bool('force-window')) then return end
 
     msg.verbose('file does not have video track, loading placeholder')
-    local placeholder = mp.command_native({"expand-path", o.placeholder})
     mp.commandv('video-add', placeholder)
 end
 
@@ -226,6 +226,10 @@ function checkForCoverart()
 end
 
 opt.read_options(o, 'coverart')
+
+if o.placeholder ~= "" then
+    placeholder = mp.command_native({"expand-path", o.placeholder})
+end
 processStrings()
 
 --runs automatically whenever a file is loaded
